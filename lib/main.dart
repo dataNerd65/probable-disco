@@ -297,7 +297,7 @@ Widget _buildTextComposer(BuildContext context,
 }
 
 void main() async {
-  await dotenv.load();
+  await dotenv.load(fileName: '.env');
   runApp(MaterialApp(
     title: 'My app',
     theme: ThemeData(
