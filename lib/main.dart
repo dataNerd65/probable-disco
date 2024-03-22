@@ -209,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSubmitted(String text) async {
     _textController.clear();
-    //Here you handle message sent by user here
+    // Here you handle message sent by user here
     setState(() {
       _messages.insert(0, ChatMessage(message: text, isFromBot: false));
     });
@@ -220,11 +220,15 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<String> sendToGeminiAPI(String message) async {
+    final String apiKey = dotenv.env['GEMINI_API_KEY']!;
+    final String baseUrl = dotenv.env['GEMINI_API_BASE_URL']!;
+    final String apiUrl = '$baseUrl/v1/chat';
+
     final response = await http.post(
-      Uri.parse('http://api.gemini.com/v1/chat'),
+      Uri.parse(apiUrl),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ${DotEnv().env['GEMINI_API_KEY']}',
+        'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode(<String, String>{
         'message': message,
@@ -232,10 +236,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     if (response.statusCode == 200) {
-      //If the server returns a 200 OK response, parse the JSON.
+      // If the server returns a 200 OK response, parse the JSON.
       return jsonDecode(response.body)['botMessage'];
     } else {
-      //if server did not return a 200 OK response, throw an exception.
+      // If server did not return a 200 OK response, throw an exception.
       throw Exception('Failed to load bot message');
     }
   }
