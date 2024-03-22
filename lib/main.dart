@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyScaffold extends StatelessWidget {
   const MyScaffold({super.key});
@@ -52,8 +54,10 @@ class MyScaffold extends StatelessWidget {
                   title: isSmallScreen ? null : const Text('Home'),
                   onTap: () {
                     // Handle navigation to home
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const ChatScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ChatScreen()));
                   },
                 ),
                 ListTile(
@@ -202,12 +206,37 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = [];
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(String text) async {
     _textController.clear();
     //Here you handle message sent by user here
     setState(() {
       _messages.insert(0, ChatMessage(message: text, isFromBot: false));
     });
+    final botMessage = await sendToGeminiAPI(text);
+    setState(() {
+      _messages.insert(0, ChatMessage(message: botMessage, isFromBot: true));
+    });
+  }
+
+  Future<String> sendToGeminiAPI(String message) async {
+    final response = await http.post(
+      Uri.parse('http://api.gemini.com/v1/chat'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${DotEnv().env['GEMINI_API_KEY']}',
+      },
+      body: jsonEncode(<String, String>{
+        'message': message,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      //If the server returns a 200 OK response, parse the JSON.
+      return jsonDecode(response.body)['botMessage'];
+    } else {
+      //if server did not return a 200 OK response, throw an exception.
+      throw Exception('Failed to load bot message');
+    }
   }
 
   @override
@@ -249,7 +278,8 @@ Widget _buildTextComposer(BuildContext context,
             child: TextField(
               controller: textController,
               onSubmitted: handleSubmitted,
-              decoration: const InputDecoration.collapsed(hintText: "Send a message"),
+              decoration:
+                  const InputDecoration.collapsed(hintText: "Send a message"),
             ),
           ),
           Container(
@@ -269,7 +299,8 @@ void main() {
   runApp(MaterialApp(
     title: 'My app',
     theme: ThemeData(
-      colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.lightGreen), // Set your desired accent color here
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Colors.lightGreen), // Set your desired accent color here
     ),
     home: const MyScaffold(),
   ));
