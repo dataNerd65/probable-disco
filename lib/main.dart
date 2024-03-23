@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_config/flutter_config.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await FlutterConfig.loadEnvVariables();
+  } catch (e) {
+    print('Error loading environment variables: $e');
+  }
+
+  runApp(MaterialApp(
+    title: 'My app',
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Colors.lightGreen), // Set your desired accent color here
+    ),
+    home: const MyScaffold(),
+  ));
+}
 
 class MyScaffold extends StatelessWidget {
   const MyScaffold({super.key});
@@ -220,27 +238,32 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<String> sendToGeminiAPI(String message) async {
-    final String apiKey = dotenv.env['GEMINI_API_KEY']!;
-    final String baseUrl = dotenv.env['GEMINI_API_BASE_URL']!;
-    final String apiUrl = '$baseUrl/v1/chat';
+    try {
+      final String apiKey = FlutterConfig.get('GEMINI_API_KEY');
+      final String baseUrl = FlutterConfig.get('GEMINI_API_BASE_URL');
+      final String apiUrl = '$baseUrl/v1/chat';
 
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode(<String, String>{
-        'message': message,
-      }),
-    );
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode(<String, String>{
+          'message': message,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      // If the server returns a 200 OK response, parse the JSON.
-      return jsonDecode(response.body)['botMessage'];
-    } else {
-      // If server did not return a 200 OK response, throw an exception.
-      throw Exception('Failed to load bot message');
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON.
+        return jsonDecode(response.body)['botMessage'];
+      } else {
+        // If server did not return a 200 OK response, throw an exception.
+        throw Exception('Failed to load bot message');
+      }
+    } catch (e) {
+      print('Error sending message to Gemini API: $e');
+      rethrow;
     }
   }
 
@@ -298,16 +321,4 @@ Widget _buildTextComposer(BuildContext context,
       ),
     ),
   );
-}
-
-void main() async {
-  await dotenv.load(fileName: '.env');
-  runApp(MaterialApp(
-    title: 'My app',
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Colors.lightGreen), // Set your desired accent color here
-    ),
-    home: const MyScaffold(),
-  ));
 }
