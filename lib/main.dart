@@ -239,9 +239,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<String> sendToGeminiAPI(String message) async {
     try {
+      await FlutterConfig.loadEnvVariables();
       final String apiKey = FlutterConfig.get('GEMINI_API_KEY');
+      print('API: Key: $apiKey');
       final String baseUrl = FlutterConfig.get('GEMINI_API_BASE_URL');
+      print('Base URL: $baseUrl');
       final String apiUrl = '$baseUrl/v1/chat';
+      print('API URL: $apiUrl');
 
       final response = await http.post(
         Uri.parse(apiUrl),
