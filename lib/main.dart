@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  //WidgetsFlutterBinding.ensureInitialized();
   try {
-    await FlutterConfig.loadEnvVariables();
+    await dotenv.load();
   } catch (e) {
     print('Error loading environment variables: $e');
   }
@@ -239,10 +239,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<String> sendToGeminiAPI(String message) async {
     try {
-      await FlutterConfig.loadEnvVariables();
-      final String apiKey = FlutterConfig.get('GEMINI_API_KEY');
+      //await FlutterConfig.loadEnvVariables();
+      final String apiKey = dotenv.env['GEMINI_API_KEY'];
       print('API: Key: $apiKey');
-      final String baseUrl = FlutterConfig.get('GEMINI_API_BASE_URL');
+      final String baseUrl = dotenv.env['GEMINI_API_BASE_URL'];
       print('Base URL: $baseUrl');
       final String apiUrl = '$baseUrl/v1/chat';
       print('API URL: $apiUrl');
