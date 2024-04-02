@@ -16,4 +16,6 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+implementation "com.github.jamesaud.FlutterConfig:plugin:latest-version"
+
 

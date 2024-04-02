@@ -4,6 +4,13 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>FlutterConfig</key>
+    <string>Info.plist</string>
+	<key>GEMINI_API_KEY</key>
+    <string>AIzaSyBKcFOYo61fwxGJTeGLeiAwR0xo3c66NMg</string>
+    <key>GEMINI_API_BASE_URL</key>
+    <string>https://generativelanguage.googleapis.com/v1beta/models/gemini-pro</string>
+
 	<key>CFBundleDisplayName</key>
 	<string>Marksyy</string>
 	<key>CFBundleExecutable</key>
